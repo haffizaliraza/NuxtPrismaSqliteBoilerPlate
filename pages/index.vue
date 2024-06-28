@@ -1,13 +1,15 @@
 <template>
   <div>
-    <h2>User List</h2>
-    <ul>
-      <li v-for="user in users" :key="user.id">
-        {{ user.name }} - {{ user.email }}
-        <button @click="deleteUser(user.id)">Delete</button>
-        <router-link :to="{ name: 'edit', params: { id: user.id }}">Edit</router-link>
-      </li>
-    </ul>
+    <form @submit.prevent="login">
+      <input v-model="username" type="text" placeholder="Username">
+      <input v-model="password" type="password" placeholder="Password">
+      <button type="submit">Login</button>
+    </form>
+    <form @submit.prevent="register">
+      <input v-model="username" type="text" placeholder="Username">
+      <input v-model="password" type="password" placeholder="Password">
+      <button type="submit">Register</button>
+    </form>
   </div>
 </template>
 
@@ -15,34 +17,34 @@
 export default {
   data() {
     return {
-      users: []
+      username: '',
+      password: '',
     };
   },
-  async created() {
-    await this.fetchUsers();
-  },
   methods: {
-    async fetchUsers() {
+    async login() {
       try {
-        const response = await this.$axios.get('/api/users');
-        this.users = response.data;
+        await this.$store.dispatch('login', {
+          username: this.username,
+          password: this.password,
+        });
+        this.$router.push('/dashboard'); // Redirect to dashboard after successful login
       } catch (error) {
-        console.error('Error fetching users:', error);
-        // Handle error: show error message or log
+        console.error('Login error:', error);
       }
     },
-    async deleteUser(id) {
-      if (confirm('Are you sure you want to delete this user?')) {
-        try {
-          await this.$axios.delete(`/api/users/${id}`);
-          this.users = this.users.filter(user => user.id !== id);
-          // Optionally: Show success message
-        } catch (error) {
-          console.error('Error deleting user:', error);
-          // Handle error: show error message or log
-        }
+
+    async register() {
+      try {
+        await this.$store.dispatch('register', {
+          username: this.username,
+          password: this.password,
+        });
+        alert('Registration successful');
+      } catch (error) {
+        console.error('Registration error:', error);
       }
-    }
-  }
+    },
+  },
 };
 </script>
